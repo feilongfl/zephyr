@@ -11,23 +11,13 @@
  * @file header for GD32 GPIO
  */
 
-#include <drivers/clock_control/stm32_clock_control.h>
+#include <drivers/clock_control/gd32_clock_control.h>
 #include <pinmux/pinmux_gd32.h>
 #include <drivers/gpio.h>
 
 /* GPIO buses definitions */
 
 #define GD32_PORT_NOT_AVAILABLE 0xFFFFFFFF
-
-#ifdef CONFIG_SOC_SERIES_GD32E1X
-#define GD32_CLOCK_BUS_GPIO GD32_CLOCK_BUS_AHB1
-#define GD32_PERIPH_GPIOA LL_AHB1_GRP1_PERIPH_GPIOA
-#define GD32_PERIPH_GPIOB LL_AHB1_GRP1_PERIPH_GPIOB
-#define GD32_PERIPH_GPIOC LL_AHB1_GRP1_PERIPH_GPIOC
-#define GD32_PERIPH_GPIOD LL_AHB1_GRP1_PERIPH_GPIOD
-#define GD32_PERIPH_GPIOE LL_AHB1_GRP1_PERIPH_GPIOE
-#define GD32_PERIPH_GPIOAF AFIO
-#endif /* CONFIG_SOC_SERIES_* */
 
 /**
  * @brief configuration of GPIO device
@@ -39,7 +29,7 @@ struct gpio_gd32_config {
 	uint32_t *base;
 	/* IO port */
 	int port;
-	struct stm32_pclken pclken;
+	struct gd32_pclken pclken;
 };
 
 /**

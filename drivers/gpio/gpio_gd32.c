@@ -16,99 +16,11 @@
 #include <pinmux/pinmux_gd32.h>
 #include <drivers/pinmux.h>
 #include <sys/util.h>
-// #include <drivers/interrupt_controller/exti_gd32.h>
 #include <pm/device.h>
 #include <pm/device_runtime.h>
 
-// #include "gd32_hsem.h"
 #include "gpio_gd32.h"
 #include "gpio_utils.h"
-
-/**
- * @brief Common GPIO driver for gd32 MCUs.
- */
-
-/**
- * @brief EXTI interrupt callback
- */
-// static void gpio_gd32_isr(int line, void *arg)
-// {
-	// struct gpio_gd32_data *data = arg;
-
-	// gpio_fire_callbacks(&data->cb, data->dev, BIT(line));
-// }
-
-/**
- * @brief Common gpio flags to custom flags
- */
-// static int gpio_gd32_flags_to_conf(int flags, int *pincfg)
-// {
-
-	// if ((flags & GPIO_OUTPUT) != 0) {
-	// 	/* Output only or Output/Input */
-
-	// 	*pincfg = gd32_PINCFG_MODE_OUTPUT;
-
-	// 	if ((flags & GPIO_SINGLE_ENDED) != 0) {
-	// 		if (flags & GPIO_LINE_OPEN_DRAIN) {
-	// 			*pincfg |= gd32_PINCFG_OPEN_DRAIN;
-	// 		} else  {
-	// 			/* Output can't be open source */
-	// 			return -ENOTSUP;
-	// 		}
-	// 	} else {
-	// 		*pincfg |= gd32_PINCFG_PUSH_PULL;
-	// 	}
-
-	// 	if ((flags & GPIO_PULL_UP) != 0) {
-	// 		*pincfg |= gd32_PINCFG_PULL_UP;
-	// 	} else if ((flags & GPIO_PULL_DOWN) != 0) {
-	// 		*pincfg |= gd32_PINCFG_PULL_DOWN;
-	// 	}
-
-	// } else if  ((flags & GPIO_INPUT) != 0) {
-	// 	/* Input */
-
-	// 	*pincfg = gd32_PINCFG_MODE_INPUT;
-
-	// 	if ((flags & GPIO_PULL_UP) != 0) {
-	// 		*pincfg |= gd32_PINCFG_PULL_UP;
-	// 	} else if ((flags & GPIO_PULL_DOWN) != 0) {
-	// 		*pincfg |= gd32_PINCFG_PULL_DOWN;
-	// 	} else {
-	// 		*pincfg |= gd32_PINCFG_FLOATING;
-	// 	}
-	// } else {
-	// 	/* Desactivated: Analog */
-	// 	*pincfg = gd32_PINCFG_MODE_ANALOG;
-	// }
-
-// 	return 0;
-// }
-
-/**
- * @brief Translate pin to pinval that the LL library needs
- */
-static inline uint32_t gd32_pinval_get(int pin)
-{
-	uint32_t pinval;
-
-#ifdef CONFIG_SOC_SERIES_gd32F1X
-	pinval = (1 << pin) << GPIO_PIN_MASK_POS;
-	if (pin < 8) {
-		pinval |= 1 << pin;
-	} else {
-		pinval |= (1 << (pin % 8)) | 0x04000000;
-	}
-#else
-	pinval = 1 << pin;
-#endif
-	return pinval;
-}
-
-uint32_t test(uint32_t a){
-	return a+1;
-}
 
 /**
  * @brief Configure the hardware.
@@ -155,26 +67,6 @@ static inline uint32_t gpio_gd32_pin_to_exti_line(int pin)
 	return 0;
 }
 
-// static void gpio_gd32_set_exti_source(int port, int pin)
-// {
-
-// }
-
-// static int gpio_gd32_get_exti_source(int pin)
-// {
-
-// 	return 0;
-// }
-
-/**
- * @brief Enable EXTI of the specific line
- */
-// static int gpio_gd32_enable_int(int port, int pin)
-// {
-
-// 	return 0;
-// }
-
 static int gpio_gd32_port_get_raw(const struct device *dev, uint32_t *value)
 {
 
@@ -185,8 +77,6 @@ static int gpio_gd32_port_set_masked_raw(const struct device *dev,
 					  gpio_port_pins_t mask,
 					  gpio_port_value_t value)
 {
-
-
 	return 0;
 }
 
@@ -225,10 +115,8 @@ static int gpio_gd32_config(const struct device *dev,
 	int err = 0;
 	int pincfg = 0;
 
-	int i = 0;
-	i++;
-
-	/* todo: figure out if we can map the requested GPIO
+	// todo:
+	/* figure out if we can map the requested GPIO
 	 * configuration
 	 */
 	// err = gpio_gd32_flags_to_conf(flags, &pincfg);
@@ -255,7 +143,6 @@ static int gpio_gd32_pin_interrupt_configure(const struct device *dev,
 					      enum gpio_int_mode mode,
 					      enum gpio_int_trig trig)
 {
-
 	return 0;
 }
 
@@ -307,11 +194,11 @@ static int gpio_gd32_pm_device_ctrl(const struct device *dev,
 
 
 #define GPIO_DEVICE_INIT(__node, __suffix, __base_addr, __port, __cenr, __bus) \
-	static const struct gpio_gd32_config gpio_gd32_cfg_## __suffix = {   \
+	static const struct gpio_gd32_config gpio_gd32_cfg_## __suffix = {     \
 		.common = {						       \
 			 .port_pin_mask = GPIO_PORT_PIN_MASK_FROM_NGPIOS(16U), \
 		},							       \
-		.base = (uint32_t *)__base_addr,				       \
+		.base = (uint32_t *)__base_addr,			       \
 		.port = __port,						       \
 		.pclken = { .bus = __bus, .enr = __cenr }		       \
 	};								       \
@@ -320,16 +207,16 @@ static int gpio_gd32_pm_device_ctrl(const struct device *dev,
 			    gpio_gd32_init,				       \
 			    gpio_gd32_pm_device_ctrl,			       \
 			    &gpio_gd32_data_## __suffix,		       \
-			    &gpio_gd32_cfg_## __suffix,		       \
+			    &gpio_gd32_cfg_## __suffix,		               \
 			    POST_KERNEL,				       \
 			    CONFIG_KERNEL_INIT_PRIORITY_DEFAULT,	       \
 			    &gpio_gd32_driver)
 
-#define GPIO_DEVICE_INIT_GD32(__suffix, __SUFFIX)			\
-	GPIO_DEVICE_INIT(DT_NODELABEL(gpio##__suffix),	\
-			 __suffix,					\
-			 DT_REG_ADDR(DT_NODELABEL(gpio##__suffix)),	\
-			 GD32_PORT##__SUFFIX,				\
+#define GPIO_DEVICE_INIT_GD32(__suffix, __SUFFIX)			    \
+	GPIO_DEVICE_INIT(DT_NODELABEL(gpio##__suffix),	                    \
+			 __suffix,					    \
+			 DT_REG_ADDR(DT_NODELABEL(gpio##__suffix)),	    \
+			 GD32_PORT##__SUFFIX,				    \
 			 DT_CLOCKS_CELL(DT_NODELABEL(gpio##__suffix), bits),\
 			 DT_CLOCKS_CELL(DT_NODELABEL(gpio##__suffix), bus))
 
