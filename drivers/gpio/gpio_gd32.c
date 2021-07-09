@@ -296,6 +296,16 @@ static int gpio_gd32_init(const struct device *dev)
 	return gpio_gd32_clock_request(dev, true);
 }
 
+#ifdef CONFIG_PM_DEVICE
+static int gpio_gd32_pm_device_ctrl(const struct device *dev,
+				     uint32_t ctrl_command,
+				     enum pm_device_state *state, pm_device_cb cb, void *arg)
+{
+	return 0;
+}
+#endif /* CONFIG_PM_DEVICE */
+
+
 #define GPIO_DEVICE_INIT(__node, __suffix, __base_addr, __port, __cenr, __bus) \
 	static const struct gpio_gd32_config gpio_gd32_cfg_## __suffix = {   \
 		.common = {						       \

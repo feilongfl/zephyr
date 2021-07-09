@@ -96,7 +96,7 @@ manifest:
       path: modules/hal/xtensa
     - name: hal_gd32
       remote: feilongfl_temp
-      revision: d552f1ee5775f129b3b32ab9beac963d9bfb64b6
+      revision: 3b4c2f7fdf8e67387e43f5939bb829a52ad2a575
       path: modules/hal/gigadevice
     - name: libmetal
       revision: 39d049d4ae68e6f6d595fce7de1dcfc1024fb4eb
