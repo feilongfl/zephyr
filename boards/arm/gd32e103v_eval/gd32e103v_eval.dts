@@ -32,10 +32,6 @@
 	};
 };
 
-&rtc {
-	status = "okay";
-};
-
 &flash0 {
 	/*
 	 * For more information, see:
@@ -54,9 +50,16 @@
 	};
 };
 
+&pll {
+	status = "okay";
+	clocks = <&clk_hsi>;
+	prediv = <2>;
+	mul = <27>;
+};
+
 &rcc {
 	clocks = <&pll>;
-	clock-frequency = <DT_FREQ_M(72)>;
+	clock-frequency = <DT_FREQ_M(108)>;
 	ahb-prescaler = <1>;
 	apb1-prescaler = <2>;
 	apb2-prescaler = <1>;

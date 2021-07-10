@@ -63,7 +63,7 @@
 
 		pll: pll {
 			#clock-cells = <0>;
-			compatible = "st,stm32g4-pll-clock";
+			compatible = "gd,gd32e103-pll-clock";
 			status = "disabled";
 		};
 	};
