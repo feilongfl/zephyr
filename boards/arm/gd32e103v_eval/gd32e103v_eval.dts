@@ -50,9 +50,14 @@
 	};
 };
 
+&clk_hse {
+	status = "okay";
+	clock-frequency = <DT_FREQ_M(8)>;
+};
+
 &pll {
 	status = "okay";
-	clocks = <&clk_hsi>;
+	clocks = <&clk_hse>;
 	prediv = <2>;
 	mul = <27>;
 };
