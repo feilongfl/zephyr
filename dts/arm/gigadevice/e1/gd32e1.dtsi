@@ -144,11 +144,11 @@
 			reg = <0x40010400 0x400>;
 		};
 
-		pinctrl: pin-controller@40010000 {
+		pinctrl: pin-controller@40010800 {
 			compatible = "gd,gd32-pinctrl";
 			#address-cells = <1>;
 			#size-cells = <1>;
-			reg = <0x40010000 0x2000>;
+			reg = <0x40010800 0x2000>;
 
 			gpioa: gpio@40010800 {
 				compatible = "gd,gd32-gpio";

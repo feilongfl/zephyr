@@ -223,4 +223,134 @@
 #define GD32_PIN_PK14  GD32PIN(GD32_PORTK, 14)
 #define GD32_PIN_PK15  GD32PIN(GD32_PORTK, 15)
 
+/**
+ * @brief Macro to generate pinmux int using port, pin number and mode arguments
+ */
+
+#define PIN_NO(port, line)	(((port) - 'A') * 0x10 + (line))
+#define GD32_PINMUX(port, line, mode, remap) \
+			(((PIN_NO(port, line)) << 8) | (mode << 6) | (remap))
+
+/**
+ * @brief Pin modes
+ */
+
+#define ALTERNATE	0x0  /* Alternate function output */
+#define GPIO_IN		0x1  /* Input */
+#define ANALOG		0x2  /* Analog */
+
+/**
+ * @brief Pin remapping configurations
+ */
+
+#define NO_REMAP	0x0  /* No remapping */
+#define REMAP_1		0x1  /* Partial remapping 1 */
+#define REMAP_2		0x2  /* Partial remapping 2 */
+#define REMAP_3		0x3  /* Partial remapping 3 */
+#define REMAP_FULL	0x4  /* Full remapping */
+
+/**
+ * @brief PIN configuration bitfield
+ *
+ * Pin configuration is coded with the following
+ * fields
+ *    GPIO I/O Mode       [ 0 ]
+ *    GPIO Input config   [ 1 : 2 ]
+ *    GPIO Output speed   [ 3 : 4 ]
+ *    GPIO Output PP/OD   [ 5 ]
+ *    GPIO Output AF/GP   [ 6 ]
+ *    GPIO PUPD Config    [ 7 : 8 ]
+ *
+ * Applicable to GD32F1 series
+ */
+
+/* Alternate functions */
+/* GD32F1 Pinmux doesn't use explicit alternate functions */
+/* These are kept for compatibility with other GD32 pinmux */
+#define GD32_AFR_MASK			0
+#define GD32_AFR_SHIFT			0
+
+/* Port Mode */
+#define GD32_MODE_INPUT		(0x0<<GD32_MODE_INOUT_SHIFT)
+#define GD32_MODE_OUTPUT		(0x1<<GD32_MODE_INOUT_SHIFT)
+#define GD32_MODE_INOUT_MASK		0x1
+#define GD32_MODE_INOUT_SHIFT		0
+
+/* Input Port configuration */
+#define GD32_CNF_IN_ANALOG		(0x0<<GD32_CNF_IN_SHIFT)
+#define GD32_CNF_IN_FLOAT		(0x1<<GD32_CNF_IN_SHIFT)
+#define GD32_CNF_IN_PUPD		(0x2<<GD32_CNF_IN_SHIFT)
+#define GD32_CNF_IN_MASK		0x3
+#define GD32_CNF_IN_SHIFT		1
+
+/* Output Port configuration */
+#define GD32_MODE_OUTPUT_MAX_10	(0x0<<GD32_MODE_OSPEED_SHIFT)
+#define GD32_MODE_OUTPUT_MAX_2		(0x1<<GD32_MODE_OSPEED_SHIFT)
+#define GD32_MODE_OUTPUT_MAX_50	(0x2<<GD32_MODE_OSPEED_SHIFT)
+#define GD32_MODE_OSPEED_MASK		0x3
+#define GD32_MODE_OSPEED_SHIFT		3
+
+#define GD32_CNF_PUSH_PULL		(0x0<<GD32_CNF_OUT_0_SHIFT)
+#define GD32_CNF_OPEN_DRAIN		(0x1<<GD32_CNF_OUT_0_SHIFT)
+#define GD32_CNF_OUT_0_MASK		0x1
+#define GD32_CNF_OUT_0_SHIFT		5
+
+#define GD32_CNF_GP_OUTPUT		(0x0<<GD32_CNF_OUT_1_SHIFT)
+#define GD32_CNF_ALT_FUNC		(0x1<<GD32_CNF_OUT_1_SHIFT)
+#define GD32_CNF_OUT_1_MASK		0x1
+#define GD32_CNF_OUT_1_SHIFT		6
+
+/* GPIO High impedance/Pull-up/Pull-down */
+#define GD32_PUPD_NO_PULL		(0x0<<GD32_PUPD_SHIFT)
+#define GD32_PUPD_PULL_UP		(0x1<<GD32_PUPD_SHIFT)
+#define GD32_PUPD_PULL_DOWN		(0x2<<GD32_PUPD_SHIFT)
+#define GD32_PUPD_MASK			0x3
+#define GD32_PUPD_SHIFT		7
+
+/* Alternate defines */
+/* IO pin functions are mostly common across GD32 devices. Notable
+ * exception is GD32F1 as these MCUs do not have registers for
+ * configuration of pin's alternate function. The configuration is
+ * done implicitly by setting specific mode and config in MODE and CNF
+ * registers for particular pin.
+ */
+#define GD32_ALTERNATE			(GD32_MODE_OUTPUT | GD32_CNF_ALT_FUNC)
+
+#define GD32_PIN_USART_TX		(GD32_ALTERNATE | GD32_CNF_PUSH_PULL)
+#define GD32_PIN_USART_RX		(GD32_MODE_INPUT | GD32_CNF_IN_FLOAT)
+#define GD32_PIN_I2C			(GD32_ALTERNATE | GD32_CNF_OPEN_DRAIN)
+#define GD32_PIN_PWM			(GD32_ALTERNATE | GD32_CNF_PUSH_PULL)
+#define GD32_PIN_SPI_MASTER_SCK	(GD32_ALTERNATE | GD32_CNF_PUSH_PULL)
+#define GD32_PIN_SPI_SLAVE_SCK		(GD32_MODE_INPUT | GD32_CNF_IN_FLOAT)
+#define GD32_PIN_SPI_MASTER_MOSI	(GD32_ALTERNATE | GD32_CNF_PUSH_PULL)
+#define GD32_PIN_SPI_SLAVE_MOSI	(GD32_MODE_INPUT | GD32_CNF_IN_FLOAT)
+#define GD32_PIN_SPI_MASTER_MISO	(GD32_MODE_INPUT | GD32_CNF_IN_FLOAT)
+#define GD32_PIN_SPI_SLAVE_MISO	(GD32_ALTERNATE | GD32_CNF_PUSH_PULL)
+#define GD32_PIN_CAN_TX		(GD32_ALTERNATE | GD32_CNF_PUSH_PULL)
+#define GD32_PIN_CAN_RX		(GD32_MODE_INPUT  | GD32_PUPD_PULL_UP)
+
+/*
+ * Reference manual (RM0008)
+ * Section 25.3.1: Slave select (NSS) pin management
+ *
+ * Hardware NSS management:
+ * - NSS output disabled: allows multimaster capability for devices operating
+ *   in master mode.
+ * - NSS output enabled: used only when the device operates in master mode.
+ *
+ * Software NSS management:
+ * - External NSS pin remains free for other application uses.
+ *
+ */
+
+/* Hardware master NSS output disabled */
+#define GD32_PIN_SPI_MASTER_NSS	(GD32_MODE_INPUT | GD32_CNF_IN_FLOAT)
+/* Hardware master NSS output enabled */
+#define GD32_PIN_SPI_MASTER_NSS_OE	(GD32_MODE_OUTPUT | \
+						GD32_CNF_ALT_FUNC | \
+						GD32_CNF_PUSH_PULL)
+#define GD32_PIN_SPI_SLAVE_NSS		(GD32_MODE_INPUT | GD32_CNF_IN_FLOAT)
+#define GD32_PIN_USB			(GD32_MODE_INPUT | GD32_CNF_IN_PUPD)
+
+
 #endif	/* ZEPHYR_GD32_PINCTRL_COMMON_H_ */

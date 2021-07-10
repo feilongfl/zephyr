@@ -8,7 +8,7 @@
 /dts-v1/;
 
 #include <gigadevice/e1/gd32e103Xb.dtsi>
-#include <gd/e1/gd32e103c(b-c-e)tx-pinctrl.dtsi>
+#include <gd/e1/gd32e103v(8-b)tx-pinctrl.dtsi>
 
 / {
 	model = "GigaDevice GD32E103VB-EVAL board";
