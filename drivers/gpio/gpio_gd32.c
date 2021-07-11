@@ -22,14 +22,62 @@
 #include "gpio_gd32.h"
 #include "gpio_utils.h"
 
+static int gpio_gd32_flags_to_conf(int flags, int *pincfg)
+{
+
+	if ((flags & GPIO_OUTPUT) != 0) {
+		/* Output only or Output/Input */
+
+		*pincfg = GD32_PINCFG_MODE_OUTPUT;
+
+		if ((flags & GPIO_SINGLE_ENDED) != 0) {
+			if (flags & GPIO_LINE_OPEN_DRAIN) {
+				*pincfg |= GD32_PINCFG_OPEN_DRAIN;
+			} else  {
+				/* Output can't be open source */
+				return -ENOTSUP;
+			}
+		} else {
+			*pincfg |= GD32_PINCFG_PUSH_PULL;
+		}
+
+		if ((flags & GPIO_PULL_UP) != 0) {
+			*pincfg |= GD32_PINCFG_PULL_UP;
+		} else if ((flags & GPIO_PULL_DOWN) != 0) {
+			*pincfg |= GD32_PINCFG_PULL_DOWN;
+		}
+
+	} else if  ((flags & GPIO_INPUT) != 0) {
+		/* Input */
+
+		*pincfg = GD32_PINCFG_MODE_INPUT;
+
+		if ((flags & GPIO_PULL_UP) != 0) {
+			*pincfg |= GD32_PINCFG_PULL_UP;
+		} else if ((flags & GPIO_PULL_DOWN) != 0) {
+			*pincfg |= GD32_PINCFG_PULL_DOWN;
+		} else {
+			*pincfg |= GD32_PINCFG_FLOATING;
+		}
+	} else {
+		/* Desactivated: Analog */
+		*pincfg = GD32_PINCFG_MODE_ANALOG;
+	}
+
+	return 0;
+}
+
 /**
  * @brief Configure the hardware.
  */
 int gpio_gd32_configure(const struct device *dev, int pin, int conf, int altf)
 {
 	const struct gpio_gd32_config *cfg = dev->config;
-	// todo: change mode and speed later
-	gpio_init((uint32_t)cfg->base, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, BIT(pin));
+
+	ARG_UNUSED(altf);
+
+	// todo: change speed by dts
+	gpio_init((uint32_t)cfg->base, conf, GPIO_OSPEED_10MHZ, BIT(pin));
 
 	return 0;
 }
@@ -69,6 +117,9 @@ static inline uint32_t gpio_gd32_pin_to_exti_line(int pin)
 
 static int gpio_gd32_port_get_raw(const struct device *dev, uint32_t *value)
 {
+	const struct gpio_gd32_config *cfg = dev->config;
+
+	*value = (uint32_t)gpio_input_port_get((uint32_t)cfg->base);
 
 	return 0;
 }
@@ -105,6 +156,8 @@ static int gpio_gd32_port_toggle_bits(const struct device *dev,
 	return 0;
 }
 
+
+
 /**
  * @brief Configure pin or port
  */
@@ -115,14 +168,13 @@ static int gpio_gd32_config(const struct device *dev,
 	int err = 0;
 	int pincfg = 0;
 
-	// todo:
 	/* figure out if we can map the requested GPIO
 	 * configuration
 	 */
-	// err = gpio_gd32_flags_to_conf(flags, &pincfg);
-	// if (err != 0) {
-	// 	goto exit;
-	// }
+	err = gpio_gd32_flags_to_conf(flags, &pincfg);
+	if (err != 0) {
+		goto exit;
+	}
 
 	if ((flags & GPIO_OUTPUT) != 0) {
 		if ((flags & GPIO_OUTPUT_INIT_HIGH) != 0) {
@@ -134,7 +186,7 @@ static int gpio_gd32_config(const struct device *dev,
 
 	gpio_gd32_configure(dev, pin, pincfg, 0);
 
-// exit:
+exit:
 	return err;
 }
 
