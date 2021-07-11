@@ -57,6 +57,7 @@
 
 	aliases {
 		led0 = &yellow_led0;
+		led1 = &yellow_led3;
 		sw0 = &user_key;
 	};
 };
