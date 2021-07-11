@@ -73,11 +73,31 @@ static int gpio_gd32_flags_to_conf(int flags, int *pincfg)
 int gpio_gd32_configure(const struct device *dev, int pin, int conf, int altf)
 {
 	const struct gpio_gd32_config *cfg = dev->config;
+	uint32_t speed = GPIO_OSPEED_10MHZ;
+	uint32_t temp = conf & (GD32_MODE_OSPEED_MASK << GD32_MODE_OSPEED_SHIFT);
 
 	ARG_UNUSED(altf);
 
-	// todo: change speed by dts
-	gpio_init((uint32_t)cfg->base, conf, GPIO_OSPEED_10MHZ, BIT(pin));
+	switch (temp)
+	{
+	case GD32_MODE_OUTPUT_MAX_2:
+		speed = GPIO_OSPEED_2MHZ;
+		break;
+
+	case GD32_MODE_OUTPUT_MAX_10:
+		speed = GPIO_OSPEED_10MHZ;
+		break;
+
+	case GD32_MODE_OUTPUT_MAX_50:
+		speed = GPIO_OSPEED_50MHZ;
+		break;
+
+	default:
+		speed = GPIO_OSPEED_MAX;
+		break;
+	}
+
+	gpio_init((uint32_t)cfg->base, conf, speed, BIT(pin));
 
 	return 0;
 }
